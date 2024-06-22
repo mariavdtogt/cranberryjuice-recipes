@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cranberry juice recipes</title>
+
+  <!-- this website uses are.na as a simple cms. It's code is heavily inspired on the project "arena-basal", a project you can find here:https://glitch.com/edit/#!/arena-basal?path=index.html%3A1%3A0. If you are interested in knowing more about this specific project and how it's code works, you can contact me via info[at]mariavandertogt.com -->
+
+  <!--  This is for routing  -->
+  <script src="//unpkg.com/navigo"></script>
+
+  <!--  script to load in the PDF.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+
+  <!-- Feel free to delete this, just some sane style defaults -->
+  <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
+
+  <!--links to load in the fonts from adobe-->
+  <link rel="stylesheet" href="https://use.typekit.net/csb7lgo.css">
+
+  <!-- Styles for our different block types -->
+  <style type="text/css">
+    body {
+      font-family: "Courier-std", monospace;
+      color: #404244;
+    }
+
+    h1 {
+      font-family: "futura-pt", sans-serif;
+      background-color: #ffffff;
+      font-weight: 250;
+      color: #404244;
+    }
+
+    .ChannelInfo {
+      margin: 0.8em;
+      padding: 0.2em;
+      height: 12em;
+    }
+
+    .ChannelContents {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      column-width: 25vw;
+      grid-gap: 3em 0.5em; /* Adjust the gap value as needed */
+      padding: 1em;
+    }
+
+    /* Media query for screens smaller than 768px (typical tablet and phone screens) */
+    @media (max-width: 768px) {
+      .ChannelContents {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .Block {
+        width: calc(100% - 2em);
+        height: auto; /* Set height to auto */
+      }
+      .BlockInner__Image,
+      .BlockInner__Media iframe {
+        max-width: 36em;
+        max-height: 25em;
+      }
+      .BlockInner__Text {
+        height: 30em;
+      }
+      .Block iframe{
+        height: 25em;
+      }
+      .BlockInner__Image,
+      .BlockInner__Media iframe {
+        max-height: 25em;
+        max-width: 25em;
+      }
+      .BlockInner__Text {
+        max-height: 25em;
+        max-width: 36em;
+      }
+      body {
+        font-size: 1.8vw;
+      }
+      h1 {
+        font-size: 3.5vw;
+      }
+    }
+
+    /* Media query for screens larger than 768px */
+    @media (min-width: 769px) {
+      .Block {
+        width: 21vw; /* Adjust as needed */
+        height: 21vw; /* Set a fixed height */
+      }
+      .Block iframe{
+        height: 18em;
+      }
+      .BlockInner__Image,
+      .BlockInner__Media iframe {
+        max-height: 18em;
+      }
+      .BlockInner__Text {
+        max-height: 18em;
+      }
+      body {
+        font-size: 1.2vw;
+      }
+      h1 {
+        font-size: 2vw;
+      }
+    }
+
+    .Block {
+      margin: 1em;
+      background-color: #ffffff;
+      border: 1px solid #404244;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .Block__title {
+      display: block;
+      padding: 0.5em;
+      text-align: center;
+      position: absolute;
+      bottom: -2.5em; /* Changed from 0 so it appears underneath the block*/
+      left: 0;
+      top: 100%;
+      width: 100%;
+    }
+
+    .BlockInner {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center; /* Center the content horizontally */
+      margin-top: auto; /* Center the content vertically */
+      margin-bottom: auto;
+    }
+
+    .BlockInner__Image,
+    .BlockInner__Media iframe {
+      max-width: 100%;
+      filter: grayscale(100%);
+      transition: filter 0.3s;
+    }
+
+    .BlockInner__Image:hover,
+    .BlockInner__Media iframe:hover {
+      filter: grayscale(0%);
+    }
+
+    .BlockInner a {
+      font-weight: normal;
+      display: block;
+      font-size: 1em;
+      text-decoration: none; /* Remove underline */
+      color: inherit; /* Inherit text color */
+    }
+
+    .BlockInner__Text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0.5em;
+    }
+
+    .BlockInner__Text p {
+      margin: 0.5em 0;
+    }
+
+    .BlockInner__Text::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3em;
+      background: linear-gradient(transparent, white);
+    }
+
+    .BlockInner__Channel {
+      padding: 1em 0.5em;
+      font-weight: bold;
+      color: green;
+      display: block;
+      text-decoration: none;
+    }
+
+    /* Added CSS for text scrolling */
+    .BlockInner__Text:hover {
+      overflow-y: auto;
+    }
+  </style>
+</head>
+
+<body></body>
+
+<script type="module">
+window.addEventListener("load", () => {
+  // Replace this with your channel slug
+  let channelSlug = 'how-to-heal-qauyz1gmw7e';
+
+  function renderChannel(slug) {
+    // Add a loading message
+    let loading = `Loading...`;
+    document.body.innerHTML = loading;
+
+    let contentsURL = `https://api.are.na/v2/channels/${slug}?sort=position&order=asc&per=100`;
+
+    // Fetch the channel data from the Are.na API
+    fetch(contentsURL)
+      // Grab the response in JSON
+      .then(response => response.json())
+
+      // Now we can channel data into content by mixing it with HTML
+      .then((channel) => {
+
+        //THIS IS THE TITLE
+        document.title = channel.title;
+
+        //this div prints the channel title
+        document.body.innerHTML = `
+          <div class="ChannelInfo">
+            <h1>HOW TO HEAL?</h1>
+          </div>
+
+          <div class="ChannelContents">
+            ${channel.contents.map((block) => {
+              // First, the code will loop through the contents of the channel.
+              // Each block will be an object.
+
+              // An example block:
+              //
+              // {
+              //   "id": 76969,
+              //   "title": "The Working Sheepdog ( Border Collies ) in training",
+              //   "updated_at": "2020-04-07T21:59:29.806Z",
+              //   "created_at": "2013-02-12T22:40:15.696Z",
+              //   "state": "available",
+              //   "comment_count": 0,
+              //   "generated_title": "The Working Sheepdog ( Border Collies ) in training",
+              //   "content_html": "",
+              //   "description_html": "<p>Border Collie Collies working sheepdog Sheep dogs in training Scotland</p>",
+              //   "visibility": "public",
+              //   "content": "",
+              //   "description": "Border Collie Collies working sheepdog Sheep dogs in training Scotland",
+              //   "source": {},
+              //   "image": {},
+              //   "embed": {},
+              //   "attachment": null,
+              //   "metadata": null,
+              //   "base_class": "Block",
+              //   "class": "Media",
+              //   "user": {},
+              //   "position": 1,
+              //   "selected": false,
+              //   "connection_id": 716562,
+              //   "connected_at": "2016-05-16T00:59:42.901Z",
+              //   "connected_by_user_id": 128,
+              //   "connected_by_username": "Chris Sherrón",
+              //   "connected_by_user_slug": "chris-sherron"
+              // },
+
+              // We are going to return HTML, mixed in with the data from the block.
+              return `
+                <div class="Block ${block.class}">
+                  ${(() => {
+                    if (block.title && block.class !== 'Link' && block.class !== 'Channel') {
+                      return `<strong class="Block__title">${block.title}</strong>`;
+                    }
+
+                    return ``;
+                  })()}
+
+                  <div class="BlockInner">
+                    <a href="https://www.are.na/block/${block.id}">
+                      ${(() => {
+                        // Return a different bit of HTML, depending on what type of block it is
+                        switch (block.class) {
+                          case "Image":
+                            return `
+                              <img
+                                class="BlockInner__Image"
+                                src="${block.image.large.url}"
+                              />
+                            `;
+                          case "Text":
+                            return `<div class="BlockInner__Text">${block.content_html}</div>`;
+                            case "Attachment":
+                              return `
+                                <div class="BlockInner__Media">
+                                  <iframe src="https://attachments.are.na/${block.id}/${block.attachment.file_name}?${block.attachment.updated_at}" width="100%" height="100%"></iframe>
+                                </div>
+                              `;
+                            default:
+                              return '';
+                            case "Media":
+                              if (block.embed && block.embed.url && block.embed.url.includes('.pdf')) {
+                                return `
+                                  <div class="BlockInner__Media">
+                                    <iframe src="${block.embed.url}" width="100%" height="100%"></iframe>
+                                  </div>
+                                `;
+                              }
+                              return '';
+                          case "Link":
+                            return `<div class="BlockInner__Link">${block.title}</div>`;
+                          case "Channel":
+                            return `<a href="#/channel/${block.slug}" class="BlockInner__Channel" data-navigo>${block.title}</a>`;
+                        }
+                      })()}
+                    </a>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        `;
+      });
+  }
+
+  // This will handle our routes
+  const router = new Navigo("/", { hash: true });
+  router
+    .on("/channel/:slug", (match) => { renderChannel(match.data.slug) })
+    .on(() => { renderChannel(channelSlug) })
+    .resolve();
+});
+</script>
+</html>
